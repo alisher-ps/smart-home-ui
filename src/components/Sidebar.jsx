@@ -6,8 +6,12 @@ import {
   FiSettings,
   FiX,
 } from "react-icons/fi";
+import { NavLink } from "react-router-dom";
 
 function Sidebar({ isOpen, closeSidebar }) {
+  const getNavClass = ({ isActive }) =>
+    isActive ? "nav-item active" : "nav-item";
+
   return (
     <>
       <div
@@ -18,10 +22,10 @@ function Sidebar({ isOpen, closeSidebar }) {
       <aside className={`sidebar ${isOpen ? "sidebar-open" : ""}`}>
         <div>
           <div className="sidebar-top">
-            <div className="sidebar-logo">
+            <NavLink to="/" className="sidebar-logo" onClick={closeSidebar}>
               <h2>SmartHome</h2>
               <p>Control Panel</p>
-            </div>
+            </NavLink>
 
             <button className="sidebar-close-btn" onClick={closeSidebar}>
               <FiX />
@@ -29,15 +33,15 @@ function Sidebar({ isOpen, closeSidebar }) {
           </div>
 
           <nav className="sidebar-nav">
-            <a href="#" className="nav-item active">
+            <NavLink to="/" className={getNavClass} onClick={closeSidebar}>
               <span className="nav-icon"><FiHome /></span>
               <span>Overview</span>
-            </a>
+            </NavLink>
 
-            <a href="#" className="nav-item">
+            <NavLink to="/rooms" className={getNavClass} onClick={closeSidebar}>
               <span className="nav-icon"><FiGrid /></span>
               <span>Rooms</span>
-            </a>
+            </NavLink>
 
             <a href="#" className="nav-item">
               <span className="nav-icon"><FiCpu /></span>
