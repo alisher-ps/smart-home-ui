@@ -7,6 +7,8 @@ import DeviceCard from "../components/DeviceCard";
 import RoomCard from "../components/RoomCard";
 
 function Dashboard() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const [devices, setDevices] = useState({
     lights: true,
     fans: false,
@@ -64,10 +66,13 @@ function Dashboard() {
 
   return (
     <div className="dashboard-layout">
-      <Sidebar />
+      <Sidebar
+        isOpen={isSidebarOpen}
+        closeSidebar={() => setIsSidebarOpen(false)}
+      />
 
       <div className="main-content">
-        <Topbar />
+        <Topbar openSidebar={() => setIsSidebarOpen(true)} />
 
         <div className="content-area">
           <section className="hero-section">

@@ -49,6 +49,7 @@ button {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
 }
 
@@ -141,6 +142,7 @@ button {
   min-height: 84px;
   border-bottom: 1px solid var(--border-color);
   background: rgba(15, 23, 42, 0.55);
+  -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   padding: 18px 28px;
   display: flex;
@@ -233,6 +235,7 @@ button {
   border-radius: 22px;
   padding: 22px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -392,26 +395,19 @@ button {
     flex-direction: column;
   }
 
-  .sidebar {
-    width: 100%;
-    padding: 20px;
-    gap: 18px;
-  }
+ .sidebar {
+  padding: 20px;
+  gap: 18px;
+}
 
-  .sidebar-top {
-    margin-bottom: 18px;
-  }
+.sidebar-top {
+  margin-bottom: 18px;
+}
 
-  .sidebar-menu-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .sidebar-nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
+.sidebar-nav {
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
 
   .main-content {
     width: 100%;
@@ -503,6 +499,7 @@ button {
   border-radius: 22px;
   padding: 22px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -569,5 +566,82 @@ button {
 @media (max-width: 700px) {
   .rooms-grid {
     grid-template-columns: 1fr;
+  }
+}
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.mobile-menu-btn {
+  display: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  color: white;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.sidebar-close-btn {
+  display: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  color: white;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .sidebar-close-btn {
+    display: flex;
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.3s ease;
+    z-index: 998;
+  }
+
+  .show-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    height: 100vh;
+    width: 260px;
+    z-index: 999;
+    transition: left 0.3s ease;
+  }
+
+  .sidebar-open {
+    left: 0;
   }
 }
