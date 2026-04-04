@@ -655,3 +655,56 @@ button {
 .sensor-actions .secondary-btn {
   flex: 1;
 }
+
+.page-container {
+  min-height: 100vh;
+  padding: 28px;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 25%),
+    linear-gradient(135deg, #0b1220, #111827, #172033);
+}
+
+.page-topbar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.page-label {
+  color: #93c5fd;
+  font-size: 13px;
+  letter-spacing: 1.4px;
+  margin-bottom: 6px;
+}
+
+.page-container h1 {
+  font-size: 36px;
+}
+
+.back-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+  border: 1px solid var(--border-color);
+  transition: 0.25s ease;
+}
+
+.back-btn:hover {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 700px) {
+  .page-container {
+    padding: 18px;
+  }
+
+  .page-container h1 {
+    font-size: 28px;
+  }
+}
