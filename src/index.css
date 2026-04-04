@@ -645,3 +645,13 @@ button {
     left: 0;
   }
 }
+.sensor-actions {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+}
+
+.sensor-actions .primary-btn,
+.sensor-actions .secondary-btn {
+  flex: 1;
+}

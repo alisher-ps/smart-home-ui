@@ -16,6 +16,15 @@ function Dashboard() {
     garage: true,
   });
 
+  const [sensors, setSensors] = useState({
+    temperature: 24,
+    humidity: 48,
+    motion: true,
+    gas: false,
+    water: false,
+    lightLevel: "Bright",
+  });
+
   const toggleDevice = (deviceName, action) => {
     setDevices((prev) => ({
       ...prev,
@@ -23,7 +32,20 @@ function Dashboard() {
     }));
   };
 
+  const updateSensor = (sensorName, value) => {
+    setSensors((prev) => ({
+      ...prev,
+      [sensorName]: value,
+    }));
+  };
+
   const activeDevicesCount = Object.values(devices).filter(Boolean).length;
+
+  const safeSensorsCount = [
+    !sensors.motion,
+    !sensors.gas,
+    !sensors.water,
+  ].filter(Boolean).length;
 
   const rooms = [
     {
@@ -97,9 +119,9 @@ function Dashboard() {
               subtitle="Currently running devices"
             />
             <StatusCard
-              title="Connection"
-              value="Online"
-              subtitle="ESP32 and dashboard connected"
+              title="Safe Sensors"
+              value={`${safeSensorsCount}/3`}
+              subtitle="Motion, gas and water normal"
             />
           </section>
 
@@ -109,12 +131,79 @@ function Dashboard() {
             </div>
 
             <div className="sensor-grid">
-              <SensorCard title="Temperature" value="24°C" subtitle="Living room average" />
-              <SensorCard title="Humidity" value="48%" subtitle="Normal indoor level" />
-              <SensorCard title="Motion" value="Detected" subtitle="PIR sensor active" alert />
-              <SensorCard title="Gas" value="Safe" subtitle="No gas leakage detected" />
-              <SensorCard title="Water" value="Dry" subtitle="No water detected" />
-              <SensorCard title="Light Level" value="Bright" subtitle="Room light is sufficient" />
+              <SensorCard
+                title="Temperature"
+                value={`${sensors.temperature}°C`}
+                subtitle="Living room average"
+                alert={sensors.temperature > 30}
+                primaryLabel="Increase"
+                secondaryLabel="Decrease"
+                onPrimaryClick={() =>
+                  updateSensor("temperature", sensors.temperature + 1)
+                }
+                onSecondaryClick={() =>
+                  updateSensor("temperature", sensors.temperature - 1)
+                }
+              />
+
+              <SensorCard
+                title="Humidity"
+                value={`${sensors.humidity}%`}
+                subtitle="Normal indoor level"
+                alert={sensors.humidity > 70}
+                primaryLabel="Increase"
+                secondaryLabel="Decrease"
+                onPrimaryClick={() =>
+                  updateSensor("humidity", sensors.humidity + 1)
+                }
+                onSecondaryClick={() =>
+                  updateSensor("humidity", sensors.humidity - 1)
+                }
+              />
+
+              <SensorCard
+                title="Motion"
+                value={sensors.motion ? "Detected" : "Clear"}
+                subtitle="PIR sensor status"
+                alert={sensors.motion}
+                primaryLabel="Detect"
+                secondaryLabel="Clear"
+                onPrimaryClick={() => updateSensor("motion", true)}
+                onSecondaryClick={() => updateSensor("motion", false)}
+              />
+
+              <SensorCard
+                title="Gas"
+                value={sensors.gas ? "Leak Detected" : "Safe"}
+                subtitle="Gas sensor monitoring"
+                alert={sensors.gas}
+                primaryLabel="Trigger"
+                secondaryLabel="Reset"
+                onPrimaryClick={() => updateSensor("gas", true)}
+                onSecondaryClick={() => updateSensor("gas", false)}
+              />
+
+              <SensorCard
+                title="Water"
+                value={sensors.water ? "Detected" : "Dry"}
+                subtitle="Water sensor monitoring"
+                alert={sensors.water}
+                primaryLabel="Trigger"
+                secondaryLabel="Reset"
+                onPrimaryClick={() => updateSensor("water", true)}
+                onSecondaryClick={() => updateSensor("water", false)}
+              />
+
+              <SensorCard
+                title="Light Level"
+                value={sensors.lightLevel}
+                subtitle="Current room brightness"
+                alert={sensors.lightLevel === "Dark"}
+                primaryLabel="Bright"
+                secondaryLabel="Dark"
+                onPrimaryClick={() => updateSensor("lightLevel", "Bright")}
+                onSecondaryClick={() => updateSensor("lightLevel", "Dark")}
+              />
             </div>
           </section>
 

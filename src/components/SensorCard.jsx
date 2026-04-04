@@ -5,7 +5,16 @@ import {
 import { FiSun, FiAlertTriangle, FiDroplet } from "react-icons/fi";
 import { MdSensors } from "react-icons/md";
 
-function SensorCard({ title, value, subtitle, alert = false }) {
+function SensorCard({
+  title,
+  value,
+  subtitle,
+  alert = false,
+  primaryLabel,
+  secondaryLabel,
+  onPrimaryClick,
+  onSecondaryClick,
+}) {
   const getIcon = () => {
     if (title === "Temperature") return <WiThermometer />;
     if (title === "Humidity") return <WiHumidity />;
@@ -26,6 +35,18 @@ function SensorCard({ title, value, subtitle, alert = false }) {
       <p className="card-title">{title}</p>
       <h3 className="card-value">{value}</h3>
       <p className="card-subtitle">{subtitle}</p>
+
+      {(primaryLabel || secondaryLabel) && (
+        <div className="sensor-actions">
+          <button className="primary-btn" onClick={onPrimaryClick}>
+            {primaryLabel}
+          </button>
+
+          <button className="secondary-btn" onClick={onSecondaryClick}>
+            {secondaryLabel}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
