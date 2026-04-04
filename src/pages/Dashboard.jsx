@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import StatusCard from "../components/StatusCard";
@@ -5,6 +6,22 @@ import SensorCard from "../components/SensorCard";
 import DeviceCard from "../components/DeviceCard";
 
 function Dashboard() {
+  const [devices, setDevices] = useState({
+    lights: true,
+    fans: false,
+    doors: false,
+    garage: true,
+  });
+
+  const toggleDevice = (deviceName, action) => {
+    setDevices((prev) => ({
+      ...prev,
+      [deviceName]: action,
+    }));
+  };
+
+  const activeDevicesCount = Object.values(devices).filter(Boolean).length;
+
   return (
     <div className="dashboard-layout">
       <Sidebar />
@@ -24,9 +41,21 @@ function Dashboard() {
           </section>
 
           <section className="status-grid">
-            <StatusCard title="Home Status" value="Secure" subtitle="All main systems normal" />
-            <StatusCard title="Active Devices" value="4" subtitle="Lights, fans and doors running" />
-            <StatusCard title="Connection" value="Online" subtitle="ESP32 and dashboard connected" />
+            <StatusCard
+              title="Home Status"
+              value="Secure"
+              subtitle="All main systems normal"
+            />
+            <StatusCard
+              title="Active Devices"
+              value={activeDevicesCount}
+              subtitle="Currently running devices"
+            />
+            <StatusCard
+              title="Connection"
+              value="Online"
+              subtitle="ESP32 and dashboard connected"
+            />
           </section>
 
           <section className="section-block">
@@ -50,10 +79,45 @@ function Dashboard() {
             </div>
 
             <div className="device-grid">
-              <DeviceCard title="Lights" subtitle="Control room lighting" status="ON" />
-              <DeviceCard title="Fans" subtitle="Control air flow" status="OFF" />
-              <DeviceCard title="Doors" subtitle="Main room doors" status="CLOSED" />
-              <DeviceCard title="Garage Door" subtitle="Garage access panel" status="OPEN" />
+              <DeviceCard
+                title="Lights"
+                subtitle="Control room lighting"
+                status={devices.lights ? "ON" : "OFF"}
+                onPrimaryClick={() => toggleDevice("lights", true)}
+                onSecondaryClick={() => toggleDevice("lights", false)}
+                primaryLabel="Turn On"
+                secondaryLabel="Turn Off"
+              />
+
+              <DeviceCard
+                title="Fans"
+                subtitle="Control air flow"
+                status={devices.fans ? "ON" : "OFF"}
+                onPrimaryClick={() => toggleDevice("fans", true)}
+                onSecondaryClick={() => toggleDevice("fans", false)}
+                primaryLabel="Turn On"
+                secondaryLabel="Turn Off"
+              />
+
+              <DeviceCard
+                title="Doors"
+                subtitle="Main room doors"
+                status={devices.doors ? "OPEN" : "CLOSED"}
+                onPrimaryClick={() => toggleDevice("doors", true)}
+                onSecondaryClick={() => toggleDevice("doors", false)}
+                primaryLabel="Open"
+                secondaryLabel="Close"
+              />
+
+              <DeviceCard
+                title="Garage Door"
+                subtitle="Garage access panel"
+                status={devices.garage ? "OPEN" : "CLOSED"}
+                onPrimaryClick={() => toggleDevice("garage", true)}
+                onSecondaryClick={() => toggleDevice("garage", false)}
+                primaryLabel="Open"
+                secondaryLabel="Close"
+              />
             </div>
           </section>
         </div>

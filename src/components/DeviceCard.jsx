@@ -1,4 +1,12 @@
-function DeviceCard({ title, subtitle, status }) {
+function DeviceCard({
+  title,
+  subtitle,
+  status,
+  onPrimaryClick,
+  onSecondaryClick,
+  primaryLabel,
+  secondaryLabel,
+}) {
   const isActive = status === "ON" || status === "OPEN";
 
   return (
@@ -15,8 +23,13 @@ function DeviceCard({ title, subtitle, status }) {
       </div>
 
       <div className="device-card-actions">
-        <button className="primary-btn">Turn On</button>
-        <button className="secondary-btn">Turn Off</button>
+        <button className="primary-btn" onClick={onPrimaryClick}>
+          {primaryLabel}
+        </button>
+
+        <button className="secondary-btn" onClick={onSecondaryClick}>
+          {secondaryLabel}
+        </button>
       </div>
     </div>
   );
