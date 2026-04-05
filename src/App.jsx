@@ -4,6 +4,7 @@ import Rooms from "./pages/Rooms";
 import RoomDetails from "./pages/RoomDetails";
 import Devices from "./pages/Devices";
 import Sensors from "./pages/Sensors";
+import Settings from "./pages/Settings";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Route path="/rooms/:roomName" element={<RoomDetails />} />
       <Route path="/devices" element={<Devices />} />
       <Route path="/sensors" element={<Sensors />} />
+      <Route path="/settings" element={<Settings />} />
     </Routes>
   );
 }
