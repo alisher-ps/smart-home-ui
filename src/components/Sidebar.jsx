@@ -34,29 +34,39 @@ function Sidebar({ isOpen, closeSidebar }) {
 
           <nav className="sidebar-nav">
             <NavLink to="/" className={getNavClass} onClick={closeSidebar}>
-              <span className="nav-icon"><FiHome /></span>
+              <span className="nav-icon">
+                <FiHome />
+              </span>
               <span>Overview</span>
             </NavLink>
 
             <NavLink to="/rooms" className={getNavClass} onClick={closeSidebar}>
-              <span className="nav-icon"><FiGrid /></span>
+              <span className="nav-icon">
+                <FiGrid />
+              </span>
               <span>Rooms</span>
             </NavLink>
 
-            <a href="#" className="nav-item">
-              <span className="nav-icon"><FiCpu /></span>
+            <NavLink to="/devices" className={getNavClass} onClick={closeSidebar}>
+              <span className="nav-icon">
+                <FiCpu />
+              </span>
               <span>Devices</span>
-            </a>
+            </NavLink>
 
-            <a href="#" className="nav-item">
-              <span className="nav-icon"><FiActivity /></span>
+            <NavLink to="/sensors" className={getNavClass} onClick={closeSidebar}>
+              <span className="nav-icon">
+                <FiActivity />
+              </span>
               <span>Sensors</span>
-            </a>
+            </NavLink>
 
-            <a href="#" className="nav-item">
-              <span className="nav-icon"><FiSettings /></span>
+            <NavLink to="/settings" className={getNavClass} onClick={closeSidebar}>
+              <span className="nav-icon">
+                <FiSettings />
+              </span>
               <span>Settings</span>
-            </a>
+            </NavLink>
           </nav>
         </div>
 
