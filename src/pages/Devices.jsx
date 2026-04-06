@@ -31,7 +31,7 @@ function Devices() {
               <p className="hero-label">SMART HOME PANEL</p>
               <h1>Devices</h1>
               <p className="hero-subtext">
-                Manage all connected home devices from one place.
+                Manage all connected smart home devices.
               </p>
             </div>
           </section>

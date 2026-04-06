@@ -2,11 +2,14 @@ import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import SensorCard from "../components/SensorCard";
-import { initialSensors } from "../data/dashboardData";
+import DeviceCard from "../components/DeviceCard";
+import { initialSensors, initialDevices } from "../data/dashboardData";
 
-function Sensors() {
+function Security() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const [sensors, setSensors] = useState(initialSensors);
+  const [devices, setDevices] = useState(initialDevices);
 
   const updateSensor = (sensorName, value) => {
     setSensors((prev) => ({
@@ -14,6 +17,21 @@ function Sensors() {
       [sensorName]: value,
     }));
   };
+
+  const toggleDevice = (deviceName, action) => {
+    setDevices((prev) => ({
+      ...prev,
+      [deviceName]: action,
+    }));
+  };
+
+  const securityScore = [
+    !sensors.motion,
+    !sensors.gas,
+    !sensors.water,
+    !devices.doors,
+    !devices.garage,
+  ].filter(Boolean).length;
 
   return (
     <div className="dashboard-layout">
@@ -29,62 +47,42 @@ function Sensors() {
           <section className="hero-section">
             <div className="hero-text">
               <p className="hero-label">SMART HOME PANEL</p>
-              <h1>Sensors</h1>
+              <h1>Security</h1>
               <p className="hero-subtext">
-                Monitor your sensor values and alerts.
+                Monitor safety sensors and entry points.
+              </p>
+            </div>
+          </section>
+
+          <section className="status-grid">
+            <div className="status-card">
+              <p className="card-title">Security Score</p>
+              <h3 className="card-value">{securityScore}/5</h3>
+              <p className="card-subtitle">
+                Based on sensors and entry status
               </p>
             </div>
           </section>
 
           <section className="section-block">
             <div className="section-header">
-              <h2>All Sensors</h2>
+              <h2>Security Sensors</h2>
             </div>
 
             <div className="sensor-grid">
               <SensorCard
-                title="Temperature"
-                value={`${sensors.temperature}°C`}
-                subtitle="Living room average"
-                alert={sensors.temperature > 30}
-                primaryLabel="Increase"
-                secondaryLabel="Decrease"
-                onPrimaryClick={() =>
-                  updateSensor("temperature", sensors.temperature + 1)
-                }
-                onSecondaryClick={() =>
-                  updateSensor("temperature", sensors.temperature - 1)
-                }
-              />
-
-              <SensorCard
-                title="Humidity"
-                value={`${sensors.humidity}%`}
-                subtitle="Normal indoor level"
-                alert={sensors.humidity > 70}
-                primaryLabel="Increase"
-                secondaryLabel="Decrease"
-                onPrimaryClick={() =>
-                  updateSensor("humidity", sensors.humidity + 1)
-                }
-                onSecondaryClick={() =>
-                  updateSensor("humidity", sensors.humidity - 1)
-                }
-              />
-
-              <SensorCard
                 title="Motion"
                 value={sensors.motion ? "Detected" : "Clear"}
-                subtitle="PIR sensor status"
+                subtitle="PIR monitoring"
                 alert={sensors.motion}
-                primaryLabel="Detect"
-                secondaryLabel="Clear"
+                primaryLabel="Trigger"
+                secondaryLabel="Reset"
                 onPrimaryClick={() => updateSensor("motion", true)}
                 onSecondaryClick={() => updateSensor("motion", false)}
               />
 
               <SensorCard
-                title="Gas"
+                title="Gas Leak"
                 value={sensors.gas ? "Leak Detected" : "Safe"}
                 subtitle="Gas sensor monitoring"
                 alert={sensors.gas}
@@ -95,7 +93,7 @@ function Sensors() {
               />
 
               <SensorCard
-                title="Water"
+                title="Water Leak"
                 value={sensors.water ? "Detected" : "Dry"}
                 subtitle="Water sensor monitoring"
                 alert={sensors.water}
@@ -104,16 +102,33 @@ function Sensors() {
                 onPrimaryClick={() => updateSensor("water", true)}
                 onSecondaryClick={() => updateSensor("water", false)}
               />
+            </div>
+          </section>
 
-              <SensorCard
-                title="Light Level"
-                value={sensors.lightLevel}
-                subtitle="Current room brightness"
-                alert={sensors.lightLevel === "Dark"}
-                primaryLabel="Bright"
-                secondaryLabel="Dark"
-                onPrimaryClick={() => updateSensor("lightLevel", "Bright")}
-                onSecondaryClick={() => updateSensor("lightLevel", "Dark")}
+          <section className="section-block">
+            <div className="section-header">
+              <h2>Entry Points</h2>
+            </div>
+
+            <div className="device-grid">
+              <DeviceCard
+                title="Main Doors"
+                subtitle="Door access control"
+                status={devices.doors ? "OPEN" : "CLOSED"}
+                primaryLabel="Open"
+                secondaryLabel="Close"
+                onPrimaryClick={() => toggleDevice("doors", true)}
+                onSecondaryClick={() => toggleDevice("doors", false)}
+              />
+
+              <DeviceCard
+                title="Garage Door"
+                subtitle="Garage access control"
+                status={devices.garage ? "OPEN" : "CLOSED"}
+                primaryLabel="Open"
+                secondaryLabel="Close"
+                onPrimaryClick={() => toggleDevice("garage", true)}
+                onSecondaryClick={() => toggleDevice("garage", false)}
               />
             </div>
           </section>
@@ -123,4 +138,4 @@ function Sensors() {
   );
 }
 
-export default Sensors;
+export default Security;

@@ -22,7 +22,7 @@ function Settings() {
               <p className="hero-label">SMART HOME PANEL</p>
               <h1>Settings</h1>
               <p className="hero-subtext">
-                Manage your project information, current system mode, and smart home setup.
+                Manage project information and dashboard mode.
               </p>
             </div>
           </section>
@@ -40,7 +40,7 @@ function Settings() {
               <p className="card-title">System Status</p>
               <h3 className="card-value small-value">Online</h3>
               <p className="card-subtitle">
-                Dashboard is running and ready for ESP32 integration.
+                Dashboard is ready for ESP32 integration.
               </p>
             </div>
 
@@ -50,54 +50,17 @@ function Settings() {
                 {demoMode ? "Demo Mode" : "Live Mode"}
               </h3>
               <p className="card-subtitle">
-                Use demo mode while building the UI and testing states.
+                Switch between UI testing and live integration mode.
               </p>
 
               <div className="settings-toggle-row">
-                <button
-                  className="primary-btn"
-                  onClick={() => setDemoMode(true)}
-                >
+                <button className="primary-btn" onClick={() => setDemoMode(true)}>
                   Demo
                 </button>
-
-                <button
-                  className="secondary-btn"
-                  onClick={() => setDemoMode(false)}
-                >
+                <button className="secondary-btn" onClick={() => setDemoMode(false)}>
                   Live
                 </button>
               </div>
-            </div>
-
-            <div className="settings-card">
-              <p className="card-title">Sensors Used</p>
-              <div className="settings-list">
-                <span>PIR Motion Sensor</span>
-                <span>DHT11 Temperature Sensor</span>
-                <span>Water Sensor</span>
-                <span>Gas Sensor</span>
-                <span>Light Sensor</span>
-                <span>Vibration Sensor</span>
-              </div>
-            </div>
-
-            <div className="settings-card">
-              <p className="card-title">Main Devices</p>
-              <div className="settings-list">
-                <span>Lights</span>
-                <span>Fans</span>
-                <span>Doors</span>
-                <span>Garage Door</span>
-              </div>
-            </div>
-
-            <div className="settings-card">
-              <p className="card-title">Platform</p>
-              <h3 className="card-value small-value">React + Vite</h3>
-              <p className="card-subtitle">
-                Frontend dashboard prepared for mobile and desktop.
-              </p>
             </div>
           </section>
         </div>
