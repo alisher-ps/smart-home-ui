@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import RoomCard from "../components/RoomCard";
 import { rooms } from "../data/roomsData";
 
 function Rooms() {
-  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
@@ -25,7 +23,7 @@ function Rooms() {
               <p className="hero-label">SMART HOME PANEL</p>
               <h1>Rooms</h1>
               <p className="hero-subtext">
-                Open each room to monitor sensors and control connected devices.
+                Open each room to monitor its devices and sensors.
               </p>
             </div>
           </section>
@@ -43,9 +41,6 @@ function Rooms() {
                   subtitle={room.subtitle}
                   activeDevices={room.activeDevices}
                   status={room.status}
-                  onView={() =>
-                    navigate(`/rooms/${room.name.replaceAll(" ", "-")}`)
-                  }
                 />
               ))}
             </div>

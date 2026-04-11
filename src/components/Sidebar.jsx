@@ -5,6 +5,7 @@ import {
   FiActivity,
   FiSettings,
   FiX,
+  FiShield,
 } from "react-icons/fi";
 import { NavLink } from "react-router-dom";
 
@@ -34,38 +35,27 @@ function Sidebar({ isOpen, closeSidebar }) {
 
           <nav className="sidebar-nav">
             <NavLink to="/" className={getNavClass} onClick={closeSidebar}>
-              <span className="nav-icon">
-                <FiHome />
-              </span>
-              <span>Overview</span>
+              <FiHome /> Overview
             </NavLink>
 
             <NavLink to="/rooms" className={getNavClass} onClick={closeSidebar}>
-              <span className="nav-icon">
-                <FiGrid />
-              </span>
-              <span>Rooms</span>
+              <FiGrid /> Rooms
             </NavLink>
 
             <NavLink to="/devices" className={getNavClass} onClick={closeSidebar}>
-              <span className="nav-icon">
-                <FiCpu />
-              </span>
-              <span>Devices</span>
+              <FiCpu /> Devices
             </NavLink>
 
             <NavLink to="/sensors" className={getNavClass} onClick={closeSidebar}>
-              <span className="nav-icon">
-                <FiActivity />
-              </span>
-              <span>Sensors</span>
+              <FiActivity /> Sensors
+            </NavLink>
+
+            <NavLink to="/security" className={getNavClass} onClick={closeSidebar}>
+              <FiShield /> Security
             </NavLink>
 
             <NavLink to="/settings" className={getNavClass} onClick={closeSidebar}>
-              <span className="nav-icon">
-                <FiSettings />
-              </span>
-              <span>Settings</span>
+              <FiSettings /> Settings
             </NavLink>
           </nav>
         </div>

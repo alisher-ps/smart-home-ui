@@ -1,17 +1,9 @@
 import { useNavigate } from "react-router-dom";
 
-function RoomCard({ name, subtitle, activeDevices, status, onView }) {
+function RoomCard({ name, subtitle, activeDevices, status }) {
   const navigate = useNavigate();
 
   const isGood = status === "Normal" || status === "Secure";
-
-  const handleView = () => {
-    if (onView) {
-      onView();
-    } else {
-      navigate(`/rooms/${name.replaceAll(" ", "-")}`);
-    }
-  };
 
   return (
     <div className="room-card">
@@ -29,7 +21,10 @@ function RoomCard({ name, subtitle, activeDevices, status, onView }) {
       <p className="card-subtitle room-subtitle">{subtitle}</p>
 
       <div className="room-card-footer">
-        <button className="room-btn" onClick={handleView}>
+        <button
+          className="room-btn"
+          onClick={() => navigate(`/rooms/${name.replaceAll(" ", "-")}`)}
+        >
           View
         </button>
       </div>
