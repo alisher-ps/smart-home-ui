@@ -3,6 +3,7 @@ const pool = require("../config/db");
 const authRoutes = require("./authRoutes");
 const deviceRoutes = require("./deviceRoutes");
 const roomRoutes = require("./roomRoutes");
+const sensorRoutes = require("./sensorRoutes");
 
 const router = express.Router();
 
@@ -35,5 +36,6 @@ router.get("/health", async (req, res) => {
 router.use("/auth", authRoutes);
 router.use("/devices", deviceRoutes);
 router.use("/rooms", roomRoutes);
+router.use("/sensors", sensorRoutes);
 
 module.exports = router;
