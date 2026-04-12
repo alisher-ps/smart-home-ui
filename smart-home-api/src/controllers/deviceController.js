@@ -5,7 +5,7 @@ const getDevices = async (req, res) => {
     const userId = req.session.user.id;
 
     const result = await pool.query(
-      `SELECT id, name, type, status, user_id, created_at
+      `SELECT id, name, type, status, user_id, room_id, created_at
        FROM devices
        WHERE user_id = $1
        ORDER BY id ASC`,
@@ -30,7 +30,7 @@ const getDevices = async (req, res) => {
 const createDevice = async (req, res) => {
   try {
     const userId = req.session.user.id;
-    const { name, type, status } = req.body || {};
+    const { name, type, status, room_id } = req.body || {};
 
     if (!name || !type) {
       return res.status(400).json({
@@ -39,11 +39,25 @@ const createDevice = async (req, res) => {
       });
     }
 
+    if (room_id) {
+      const roomCheck = await pool.query(
+        `SELECT id FROM rooms WHERE id = $1 AND user_id = $2`,
+        [room_id, userId]
+      );
+
+      if (roomCheck.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Room not found for this user",
+        });
+      }
+    }
+
     const result = await pool.query(
-      `INSERT INTO devices (name, type, status, user_id)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id, name, type, status, user_id, created_at`,
-      [name, type, status ?? false, userId]
+      `INSERT INTO devices (name, type, status, user_id, room_id)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, name, type, status, user_id, room_id, created_at`,
+      [name, type, status ?? false, userId, room_id ?? null]
     );
 
     return res.status(201).json({
@@ -66,7 +80,7 @@ const updateDevice = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const { id } = req.params;
-    const { name, type, status } = req.body || {};
+    const { name, type, status, room_id } = req.body || {};
 
     const existingDevice = await pool.query(
       `SELECT * FROM devices WHERE id = $1 AND user_id = $2`,
@@ -80,18 +94,34 @@ const updateDevice = async (req, res) => {
       });
     }
 
+    if (room_id !== undefined && room_id !== null) {
+      const roomCheck = await pool.query(
+        `SELECT id FROM rooms WHERE id = $1 AND user_id = $2`,
+        [room_id, userId]
+      );
+
+      if (roomCheck.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Room not found for this user",
+        });
+      }
+    }
+
     const currentDevice = existingDevice.rows[0];
 
     const updatedName = name ?? currentDevice.name;
     const updatedType = type ?? currentDevice.type;
     const updatedStatus = status ?? currentDevice.status;
+    const updatedRoomId =
+      room_id === undefined ? currentDevice.room_id : room_id;
 
     const result = await pool.query(
       `UPDATE devices
-       SET name = $1, type = $2, status = $3
-       WHERE id = $4 AND user_id = $5
-       RETURNING id, name, type, status, user_id, created_at`,
-      [updatedName, updatedType, updatedStatus, id, userId]
+       SET name = $1, type = $2, status = $3, room_id = $4
+       WHERE id = $5 AND user_id = $6
+       RETURNING id, name, type, status, user_id, room_id, created_at`,
+      [updatedName, updatedType, updatedStatus, updatedRoomId, id, userId]
     );
 
     return res.status(200).json({
@@ -118,7 +148,7 @@ const deleteDevice = async (req, res) => {
     const result = await pool.query(
       `DELETE FROM devices
        WHERE id = $1 AND user_id = $2
-       RETURNING id, name, type, status`,
+       RETURNING id, name, type, status, room_id`,
       [id, userId]
     );
 
