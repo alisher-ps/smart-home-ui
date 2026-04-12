@@ -1,18 +1,63 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import DeviceCard from "../components/DeviceCard";
-import { initialDevices } from "../data/dashboardData";
+import { getDevices, updateDevice } from "../api/devices";
 
 function Devices() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [devices, setDevices] = useState(initialDevices);
+  const [devices, setDevices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const toggleDevice = (deviceName, action) => {
-    setDevices((prev) => ({
-      ...prev,
-      [deviceName]: action,
-    }));
+  const fetchDevices = async () => {
+    try {
+      setLoading(true);
+      const data = await getDevices();
+      setDevices(data.devices || []);
+    } catch (err) {
+      setError("Failed to load devices");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+  const autoLoginAndLoad = async () => {
+    try {
+      await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: "omar@test.com",
+          password: "123456",
+        }),
+      });
+
+      await fetchDevices();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  autoLoginAndLoad();
+}, []);
+
+  const toggleDevice = async (device, status) => {
+    try {
+      const data = await updateDevice(device.id, { status });
+
+      setDevices((prev) =>
+        prev.map((d) =>
+          d.id === device.id ? data.device : d
+        )
+      );
+    } catch (err) {
+      setError("Failed to update device");
+    }
   };
 
   return (
@@ -41,46 +86,42 @@ function Devices() {
               <h2>All Devices</h2>
             </div>
 
+            {loading && <p>Loading devices...</p>}
+            {error && <p>{error}</p>}
+
             <div className="device-grid">
-              <DeviceCard
-                title="Lights"
-                subtitle="Control room lighting"
-                status={devices.lights ? "ON" : "OFF"}
-                onPrimaryClick={() => toggleDevice("lights", true)}
-                onSecondaryClick={() => toggleDevice("lights", false)}
-                primaryLabel="Turn On"
-                secondaryLabel="Turn Off"
-              />
-
-              <DeviceCard
-                title="Fans"
-                subtitle="Control air flow"
-                status={devices.fans ? "ON" : "OFF"}
-                onPrimaryClick={() => toggleDevice("fans", true)}
-                onSecondaryClick={() => toggleDevice("fans", false)}
-                primaryLabel="Turn On"
-                secondaryLabel="Turn Off"
-              />
-
-              <DeviceCard
-                title="Doors"
-                subtitle="Main room doors"
-                status={devices.doors ? "OPEN" : "CLOSED"}
-                onPrimaryClick={() => toggleDevice("doors", true)}
-                onSecondaryClick={() => toggleDevice("doors", false)}
-                primaryLabel="Open"
-                secondaryLabel="Close"
-              />
-
-              <DeviceCard
-                title="Garage Door"
-                subtitle="Garage access panel"
-                status={devices.garage ? "OPEN" : "CLOSED"}
-                onPrimaryClick={() => toggleDevice("garage", true)}
-                onSecondaryClick={() => toggleDevice("garage", false)}
-                primaryLabel="Open"
-                secondaryLabel="Close"
-              />
+              {devices.map((device) => (
+                <DeviceCard
+                  key={device.id}
+                  title={device.name}
+                  subtitle={device.type}
+                  status={
+                    device.type === "door"
+                      ? device.status
+                        ? "OPEN"
+                        : "CLOSED"
+                      : device.status
+                      ? "ON"
+                      : "OFF"
+                  }
+                  onPrimaryClick={() =>
+                    toggleDevice(device, true)
+                  }
+                  onSecondaryClick={() =>
+                    toggleDevice(device, false)
+                  }
+                  primaryLabel={
+                    device.type === "door"
+                      ? "Open"
+                      : "Turn On"
+                  }
+                  secondaryLabel={
+                    device.type === "door"
+                      ? "Close"
+                      : "Turn Off"
+                  }
+                />
+              ))}
             </div>
           </section>
         </div>

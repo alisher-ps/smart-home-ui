@@ -9,7 +9,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
@@ -19,22 +19,21 @@ app.use(express.json());
 app.use(
   session({
     name: "smart_home_sid",
-    secret: process.env.SESSION_SECRET,
+    secret: "smart-home-secret",
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
-      maxAge: 1000 * 60 * 60 * 24,
     },
   })
 );
 
-app.get("/", (req, res) => {
-  res.send("Smart Home API is running");
-});
-
 app.use("/api", routes);
+
+app.get("/", (req, res) => {
+  res.send("Smart Home API running");
+});
 
 module.exports = app;
