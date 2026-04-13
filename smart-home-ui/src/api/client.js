@@ -1,6 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
-async function apiRequest(endpoint, options = {}) {
+export async function apiFetch(endpoint, options = {}) {
   const response = await fetch(`${API_URL}${endpoint}`, {
     credentials: "include",
     headers: {
@@ -19,4 +19,4 @@ async function apiRequest(endpoint, options = {}) {
   return data;
 }
 
-export default apiRequest;
+export default apiFetch;

@@ -1,18 +1,25 @@
-import apiRequest from "./client";
+import { apiFetch } from "./client";
 
-export const login = async (email, password) => {
-  return apiRequest("/auth/login", {
+export const login = async (data) => {
+  return apiFetch("/auth/login", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(data),
   });
 };
 
-export const logout = async () => {
-  return apiRequest("/auth/logout", {
+export const register = async (data) => {
+  return apiFetch("/auth/register", {
     method: "POST",
+    body: JSON.stringify(data),
   });
 };
 
 export const getMe = async () => {
-  return apiRequest("/auth/me");
+  return apiFetch("/auth/me");
+};
+
+export const logout = async () => {
+  return apiFetch("/auth/logout", {
+    method: "POST",
+  });
 };
