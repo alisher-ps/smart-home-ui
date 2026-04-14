@@ -1,9 +1,11 @@
 import { FiBell, FiWifi, FiUser, FiMenu } from "react-icons/fi";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../api/auth";
+import { logout, getMe } from "../api/auth";
 
 function Topbar({ openSidebar }) {
   const navigate = useNavigate();
+  const [userName, setUserName] = useState("User");
 
   const today = new Date().toLocaleDateString("en-GB", {
     day: "2-digit",
@@ -11,12 +13,24 @@ function Topbar({ openSidebar }) {
     year: "numeric",
   });
 
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const data = await getMe();
+        setUserName(data?.user?.name || "User");
+      } catch (error) {
+        setUserName("User");
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
   const handleLogout = async () => {
     try {
       await logout();
       navigate("/login");
     } catch (error) {
-      console.error("Logout failed:", error);
       navigate("/login");
     }
   };
@@ -52,9 +66,10 @@ function Topbar({ openSidebar }) {
             border: "none",
             cursor: "pointer",
           }}
+          title="Logout"
         >
           <FiUser />
-          <span>Logout</span>
+          <span>{userName}</span>
         </button>
       </div>
     </header>
