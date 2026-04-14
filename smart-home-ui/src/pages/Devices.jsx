@@ -13,50 +13,31 @@ function Devices() {
   const fetchDevices = async () => {
     try {
       setLoading(true);
+      setError("");
       const data = await getDevices();
       setDevices(data.devices || []);
     } catch (err) {
-      setError("Failed to load devices");
+      setError(err.message || "Failed to load devices");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-  const autoLoginAndLoad = async () => {
+    fetchDevices();
+  }, []);
+
+  const toggleDevice = async (device, newStatus) => {
     try {
-      await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: "omar@test.com",
-          password: "123456",
-        }),
+      setError("");
+
+      await updateDevice(device.id, {
+        status: newStatus,
       });
 
       await fetchDevices();
     } catch (err) {
-      console.error(err);
-    }
-  };
-
-  autoLoginAndLoad();
-}, []);
-
-  const toggleDevice = async (device, status) => {
-    try {
-      const data = await updateDevice(device.id, { status });
-
-      setDevices((prev) =>
-        prev.map((d) =>
-          d.id === device.id ? data.device : d
-        )
-      );
-    } catch (err) {
-      setError("Failed to update device");
+      setError(err.message || "Failed to update device");
     }
   };
 
@@ -104,22 +85,10 @@ function Devices() {
                       ? "ON"
                       : "OFF"
                   }
-                  onPrimaryClick={() =>
-                    toggleDevice(device, true)
-                  }
-                  onSecondaryClick={() =>
-                    toggleDevice(device, false)
-                  }
-                  primaryLabel={
-                    device.type === "door"
-                      ? "Open"
-                      : "Turn On"
-                  }
-                  secondaryLabel={
-                    device.type === "door"
-                      ? "Close"
-                      : "Turn Off"
-                  }
+                  onPrimaryClick={() => toggleDevice(device, true)}
+                  onSecondaryClick={() => toggleDevice(device, false)}
+                  primaryLabel={device.type === "door" ? "Open" : "Turn On"}
+                  secondaryLabel={device.type === "door" ? "Close" : "Turn Off"}
                 />
               ))}
             </div>

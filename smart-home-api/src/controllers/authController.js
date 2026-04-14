@@ -3,7 +3,7 @@ const pool = require("../config/db");
 
 const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password } = req.body || {};
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -31,8 +31,7 @@ const register = async (req, res) => {
       });
     }
 
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
+    const passwordHash = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
       `INSERT INTO users (name, email, password_hash)
@@ -67,7 +66,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
 
     if (!email || !password) {
       return res.status(400).json({
@@ -89,7 +88,6 @@ const login = async (req, res) => {
     }
 
     const user = result.rows[0];
-
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isPasswordValid) {
@@ -133,7 +131,7 @@ const logout = async (req, res) => {
         });
       }
 
-      res.clearCookie("connect.sid");
+      res.clearCookie("smart_home_sid");
 
       return res.status(200).json({
         success: true,

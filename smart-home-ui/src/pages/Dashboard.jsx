@@ -1,40 +1,204 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import StatusCard from "../components/StatusCard";
 import SensorCard from "../components/SensorCard";
 import DeviceCard from "../components/DeviceCard";
 import RoomCard from "../components/RoomCard";
-import { rooms } from "../data/roomsData";
-import { initialDevices, initialSensors } from "../data/dashboardData";
+import { getRooms } from "../api/rooms";
+import { getDevices, updateDevice } from "../api/devices";
+import { getSensors, updateSensor } from "../api/sensors";
 
 function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [rooms, setRooms] = useState([]);
+  const [devices, setDevices] = useState([]);
+  const [sensors, setSensors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const [devices, setDevices] = useState(initialDevices);
-  const [sensors, setSensors] = useState(initialSensors);
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-  const toggleDevice = (deviceName, action) => {
-    setDevices((prev) => ({
-      ...prev,
-      [deviceName]: action,
-    }));
+      const [roomsData, devicesData, sensorsData] = await Promise.all([
+        getRooms(),
+        getDevices(),
+        getSensors(),
+      ]);
+
+      setRooms(roomsData.rooms || []);
+      setDevices(devicesData.devices || []);
+      setSensors(sensorsData.sensors || []);
+    } catch (err) {
+      setError(err.message || "Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updateSensor = (sensorName, value) => {
-    setSensors((prev) => ({
-      ...prev,
-      [sensorName]: value,
-    }));
+  useEffect(() => {
+    fetchAllData();
+  }, []);
+
+  const activeDevicesCount = devices.filter((device) => device.status).length;
+
+  const safeSensorsCount = sensors.filter((sensor) => {
+    const type = String(sensor.type || "").toLowerCase();
+    const value = String(sensor.value || "").toLowerCase();
+
+    if (type === "pir" || type === "motion") return value !== "detected";
+    if (type === "gas") return value !== "leak" && value !== "detected";
+    if (type === "water") return value !== "detected" && value !== "wet";
+
+    return sensor.status !== "warning" && sensor.status !== "danger";
+  }).length;
+
+  const homeStatus = useMemo(() => {
+    const hasDanger = sensors.some(
+      (sensor) =>
+        sensor.status === "danger" ||
+        String(sensor.value || "").toLowerCase() === "leak"
+    );
+
+    return hasDanger ? "Alert" : "Secure";
+  }, [sensors]);
+
+  const featuredSensors = sensors.slice(0, 6);
+  const featuredDevices = devices.slice(0, 4);
+
+  const handleDeviceToggle = async (device, status) => {
+    try {
+      setError("");
+      await updateDevice(device.id, { status });
+      await fetchAllData();
+    } catch (err) {
+      setError(err.message || "Failed to update device");
+    }
   };
 
-  const activeDevicesCount = Object.values(devices).filter(Boolean).length;
+  const handleSensorQuickUpdate = async (sensor, updates) => {
+    try {
+      setError("");
+      await updateSensor(sensor.id, updates);
+      await fetchAllData();
+    } catch (err) {
+      setError(err.message || "Failed to update sensor");
+    }
+  };
 
-  const safeSensorsCount = [
-    !sensors.motion,
-    !sensors.gas,
-    !sensors.water,
-  ].filter(Boolean).length;
+  const renderDashboardSensor = (sensor) => {
+    const type = String(sensor.type || "").toLowerCase();
+    const value = sensor.value;
+
+    if (type === "temperature") {
+      const numericValue = Number(value) || 0;
+      return (
+        <SensorCard
+          key={sensor.id}
+          title={sensor.name}
+          value={`${numericValue}${sensor.unit || ""}`}
+          subtitle="Temperature sensor"
+          alert={numericValue > 30}
+          primaryLabel="Increase"
+          secondaryLabel="Decrease"
+          onPrimaryClick={() =>
+            handleSensorQuickUpdate(sensor, { value: String(numericValue + 1) })
+          }
+          onSecondaryClick={() =>
+            handleSensorQuickUpdate(sensor, { value: String(numericValue - 1) })
+          }
+        />
+      );
+    }
+
+    if (type === "humidity") {
+      const numericValue = Number(value) || 0;
+      return (
+        <SensorCard
+          key={sensor.id}
+          title={sensor.name}
+          value={`${numericValue}${sensor.unit || ""}`}
+          subtitle="Humidity sensor"
+          alert={numericValue > 70}
+          primaryLabel="Increase"
+          secondaryLabel="Decrease"
+          onPrimaryClick={() =>
+            handleSensorQuickUpdate(sensor, { value: String(numericValue + 1) })
+          }
+          onSecondaryClick={() =>
+            handleSensorQuickUpdate(sensor, { value: String(numericValue - 1) })
+          }
+        />
+      );
+    }
+
+    if (type === "pir" || type === "motion") {
+      const detected = value === "detected" || value === "true" || value === true;
+      return (
+        <SensorCard
+          key={sensor.id}
+          title={sensor.name}
+          value={detected ? "Detected" : "Clear"}
+          subtitle="PIR sensor status"
+          alert={detected}
+          primaryLabel="Detect"
+          secondaryLabel="Clear"
+          onPrimaryClick={() => handleSensorQuickUpdate(sensor, { value: "detected" })}
+          onSecondaryClick={() => handleSensorQuickUpdate(sensor, { value: "clear" })}
+        />
+      );
+    }
+
+    if (type === "gas") {
+      const leak = value === "leak" || value === "detected" || value === "true" || value === true;
+      return (
+        <SensorCard
+          key={sensor.id}
+          title={sensor.name}
+          value={leak ? "Leak Detected" : "Safe"}
+          subtitle="Gas sensor monitoring"
+          alert={leak}
+          primaryLabel="Trigger"
+          secondaryLabel="Reset"
+          onPrimaryClick={() => handleSensorQuickUpdate(sensor, { value: "leak" })}
+          onSecondaryClick={() => handleSensorQuickUpdate(sensor, { value: "safe" })}
+        />
+      );
+    }
+
+    if (type === "water") {
+      const detected = value === "detected" || value === "wet" || value === "true" || value === true;
+      return (
+        <SensorCard
+          key={sensor.id}
+          title={sensor.name}
+          value={detected ? "Detected" : "Dry"}
+          subtitle="Water sensor monitoring"
+          alert={detected}
+          primaryLabel="Trigger"
+          secondaryLabel="Reset"
+          onPrimaryClick={() => handleSensorQuickUpdate(sensor, { value: "detected" })}
+          onSecondaryClick={() => handleSensorQuickUpdate(sensor, { value: "dry" })}
+        />
+      );
+    }
+
+    return (
+      <SensorCard
+        key={sensor.id}
+        title={sensor.name}
+        value={sensor.value ?? "N/A"}
+        subtitle={sensor.type || "Sensor"}
+        alert={sensor.status === "warning" || sensor.status === "danger"}
+        primaryLabel="Normal"
+        secondaryLabel="Warning"
+        onPrimaryClick={() => handleSensorQuickUpdate(sensor, { status: "normal" })}
+        onSecondaryClick={() => handleSensorQuickUpdate(sensor, { status: "warning" })}
+      />
+    );
+  };
 
   return (
     <div className="dashboard-layout">
@@ -57,11 +221,14 @@ function Dashboard() {
             </div>
           </section>
 
+          {loading && <p>Loading dashboard...</p>}
+          {error && <p>{error}</p>}
+
           <section className="status-grid">
             <StatusCard
               title="Home Status"
-              value="Secure"
-              subtitle="All main systems normal"
+              value={homeStatus}
+              subtitle="System-wide live status"
             />
             <StatusCard
               title="Active Devices"
@@ -70,8 +237,8 @@ function Dashboard() {
             />
             <StatusCard
               title="Safe Sensors"
-              value={`${safeSensorsCount}/3`}
-              subtitle="Motion, gas and water normal"
+              value={`${safeSensorsCount}/${sensors.length || 0}`}
+              subtitle="Sensors currently normal"
             />
           </section>
 
@@ -81,79 +248,7 @@ function Dashboard() {
             </div>
 
             <div className="sensor-grid">
-              <SensorCard
-                title="Temperature"
-                value={`${sensors.temperature}°C`}
-                subtitle="Living room average"
-                alert={sensors.temperature > 30}
-                primaryLabel="Increase"
-                secondaryLabel="Decrease"
-                onPrimaryClick={() =>
-                  updateSensor("temperature", sensors.temperature + 1)
-                }
-                onSecondaryClick={() =>
-                  updateSensor("temperature", sensors.temperature - 1)
-                }
-              />
-
-              <SensorCard
-                title="Humidity"
-                value={`${sensors.humidity}%`}
-                subtitle="Normal indoor level"
-                alert={sensors.humidity > 70}
-                primaryLabel="Increase"
-                secondaryLabel="Decrease"
-                onPrimaryClick={() =>
-                  updateSensor("humidity", sensors.humidity + 1)
-                }
-                onSecondaryClick={() =>
-                  updateSensor("humidity", sensors.humidity - 1)
-                }
-              />
-
-              <SensorCard
-                title="Motion"
-                value={sensors.motion ? "Detected" : "Clear"}
-                subtitle="PIR sensor status"
-                alert={sensors.motion}
-                primaryLabel="Detect"
-                secondaryLabel="Clear"
-                onPrimaryClick={() => updateSensor("motion", true)}
-                onSecondaryClick={() => updateSensor("motion", false)}
-              />
-
-              <SensorCard
-                title="Gas"
-                value={sensors.gas ? "Leak Detected" : "Safe"}
-                subtitle="Gas sensor monitoring"
-                alert={sensors.gas}
-                primaryLabel="Trigger"
-                secondaryLabel="Reset"
-                onPrimaryClick={() => updateSensor("gas", true)}
-                onSecondaryClick={() => updateSensor("gas", false)}
-              />
-
-              <SensorCard
-                title="Water"
-                value={sensors.water ? "Detected" : "Dry"}
-                subtitle="Water sensor monitoring"
-                alert={sensors.water}
-                primaryLabel="Trigger"
-                secondaryLabel="Reset"
-                onPrimaryClick={() => updateSensor("water", true)}
-                onSecondaryClick={() => updateSensor("water", false)}
-              />
-
-              <SensorCard
-                title="Light Level"
-                value={sensors.lightLevel}
-                subtitle="Current room brightness"
-                alert={sensors.lightLevel === "Dark"}
-                primaryLabel="Bright"
-                secondaryLabel="Dark"
-                onPrimaryClick={() => updateSensor("lightLevel", "Bright")}
-                onSecondaryClick={() => updateSensor("lightLevel", "Dark")}
-              />
+              {featuredSensors.map(renderDashboardSensor)}
             </div>
           </section>
 
@@ -163,45 +258,26 @@ function Dashboard() {
             </div>
 
             <div className="device-grid">
-              <DeviceCard
-                title="Lights"
-                subtitle="Control room lighting"
-                status={devices.lights ? "ON" : "OFF"}
-                onPrimaryClick={() => toggleDevice("lights", true)}
-                onSecondaryClick={() => toggleDevice("lights", false)}
-                primaryLabel="Turn On"
-                secondaryLabel="Turn Off"
-              />
-
-              <DeviceCard
-                title="Fans"
-                subtitle="Control air flow"
-                status={devices.fans ? "ON" : "OFF"}
-                onPrimaryClick={() => toggleDevice("fans", true)}
-                onSecondaryClick={() => toggleDevice("fans", false)}
-                primaryLabel="Turn On"
-                secondaryLabel="Turn Off"
-              />
-
-              <DeviceCard
-                title="Doors"
-                subtitle="Main room doors"
-                status={devices.doors ? "OPEN" : "CLOSED"}
-                onPrimaryClick={() => toggleDevice("doors", true)}
-                onSecondaryClick={() => toggleDevice("doors", false)}
-                primaryLabel="Open"
-                secondaryLabel="Close"
-              />
-
-              <DeviceCard
-                title="Garage Door"
-                subtitle="Garage access panel"
-                status={devices.garage ? "OPEN" : "CLOSED"}
-                onPrimaryClick={() => toggleDevice("garage", true)}
-                onSecondaryClick={() => toggleDevice("garage", false)}
-                primaryLabel="Open"
-                secondaryLabel="Close"
-              />
+              {featuredDevices.map((device) => (
+                <DeviceCard
+                  key={device.id}
+                  title={device.name}
+                  subtitle={device.type}
+                  status={
+                    device.type === "door"
+                      ? device.status
+                        ? "OPEN"
+                        : "CLOSED"
+                      : device.status
+                      ? "ON"
+                      : "OFF"
+                  }
+                  onPrimaryClick={() => handleDeviceToggle(device, true)}
+                  onSecondaryClick={() => handleDeviceToggle(device, false)}
+                  primaryLabel={device.type === "door" ? "Open" : "Turn On"}
+                  secondaryLabel={device.type === "door" ? "Close" : "Turn Off"}
+                />
+              ))}
             </div>
           </section>
 
@@ -211,15 +287,21 @@ function Dashboard() {
             </div>
 
             <div className="rooms-grid">
-              {rooms.map((room) => (
-                <RoomCard
-                  key={room.name}
-                  name={room.name}
-                  subtitle={room.subtitle}
-                  activeDevices={room.activeDevices}
-                  status={room.status}
-                />
-              ))}
+              {rooms.map((room) => {
+                const roomDeviceCount = devices.filter(
+                  (device) => device.room_id === room.id && device.status
+                ).length;
+
+                return (
+                  <RoomCard
+                    key={room.id}
+                    name={room.name}
+                    subtitle={room.type}
+                    activeDevices={roomDeviceCount}
+                    status="Connected"
+                  />
+                );
+              })}
             </div>
           </section>
         </div>

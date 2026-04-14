@@ -1,11 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import RoomCard from "../components/RoomCard";
-import { rooms } from "../data/roomsData";
+import { getRooms } from "../api/rooms";
 
 function Rooms() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const data = await getRooms();
+        setRooms(data.rooms || []);
+      } catch (err) {
+        setError(err.message || "Failed to load rooms");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRooms();
+  }, []);
 
   return (
     <div className="dashboard-layout">
@@ -33,14 +53,17 @@ function Rooms() {
               <h2>All Rooms</h2>
             </div>
 
+            {loading && <p>Loading rooms...</p>}
+            {error && <p>{error}</p>}
+
             <div className="rooms-grid">
               {rooms.map((room) => (
                 <RoomCard
-                  key={room.name}
+                  key={room.id}
                   name={room.name}
-                  subtitle={room.subtitle}
-                  activeDevices={room.activeDevices}
-                  status={room.status}
+                  subtitle={room.type}
+                  activeDevices={0}
+                  status="Connected"
                 />
               ))}
             </div>

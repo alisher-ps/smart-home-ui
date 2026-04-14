@@ -79,20 +79,31 @@ const createDevice = async (req, res) => {
 const updateDevice = async (req, res) => {
   try {
     const userId = req.session.user.id;
-    const { id } = req.params;
+    const deviceId = Number(req.params.id);
     const { name, type, status, room_id } = req.body || {};
 
-    const existingDevice = await pool.query(
-      `SELECT * FROM devices WHERE id = $1 AND user_id = $2`,
-      [id, userId]
+    if (Number.isNaN(deviceId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid device id",
+      });
+    }
+
+    const existingDeviceResult = await pool.query(
+      `SELECT id, name, type, status, user_id, room_id, created_at
+       FROM devices
+       WHERE id = $1 AND user_id = $2`,
+      [deviceId, userId]
     );
 
-    if (existingDevice.rows.length === 0) {
+    if (existingDeviceResult.rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Device not found",
       });
     }
+
+    const currentDevice = existingDeviceResult.rows[0];
 
     if (room_id !== undefined && room_id !== null) {
       const roomCheck = await pool.query(
@@ -108,8 +119,6 @@ const updateDevice = async (req, res) => {
       }
     }
 
-    const currentDevice = existingDevice.rows[0];
-
     const updatedName = name ?? currentDevice.name;
     const updatedType = type ?? currentDevice.type;
     const updatedStatus = status ?? currentDevice.status;
@@ -118,10 +127,20 @@ const updateDevice = async (req, res) => {
 
     const result = await pool.query(
       `UPDATE devices
-       SET name = $1, type = $2, status = $3, room_id = $4
+       SET name = $1,
+           type = $2,
+           status = $3,
+           room_id = $4
        WHERE id = $5 AND user_id = $6
        RETURNING id, name, type, status, user_id, room_id, created_at`,
-      [updatedName, updatedType, updatedStatus, updatedRoomId, id, userId]
+      [
+        updatedName,
+        updatedType,
+        updatedStatus,
+        updatedRoomId,
+        deviceId,
+        userId,
+      ]
     );
 
     return res.status(200).json({
@@ -143,13 +162,20 @@ const updateDevice = async (req, res) => {
 const deleteDevice = async (req, res) => {
   try {
     const userId = req.session.user.id;
-    const { id } = req.params;
+    const deviceId = Number(req.params.id);
+
+    if (Number.isNaN(deviceId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid device id",
+      });
+    }
 
     const result = await pool.query(
       `DELETE FROM devices
        WHERE id = $1 AND user_id = $2
        RETURNING id, name, type, status, room_id`,
-      [id, userId]
+      [deviceId, userId]
     );
 
     if (result.rows.length === 0) {
