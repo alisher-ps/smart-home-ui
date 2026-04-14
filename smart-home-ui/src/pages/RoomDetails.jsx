@@ -11,7 +11,7 @@ function RoomDetails() {
   const navigate = useNavigate();
 
   const formattedRoomName = useMemo(
-    () => roomName.replaceAll("-", " ").toLowerCase(),
+    () => String(roomName || "").replaceAll("-", " ").toLowerCase(),
     [roomName]
   );
 
@@ -28,8 +28,9 @@ function RoomDetails() {
 
       const roomsData = await getRooms();
       const matchedRoom = (roomsData.rooms || []).find(
-        (item) => item.name.toLowerCase().replaceAll(" ", "-") === roomName
-          || item.name.toLowerCase() === formattedRoomName
+        (item) =>
+          item.name.toLowerCase().replaceAll(" ", "-") === roomName ||
+          item.name.toLowerCase() === formattedRoomName
       );
 
       if (!matchedRoom) {
@@ -241,7 +242,7 @@ function RoomDetails() {
               title={device.name}
               subtitle={device.type}
               status={
-                device.type === "door"
+                device.type === "door" || device.type === "garage_door"
                   ? device.status
                     ? "OPEN"
                     : "CLOSED"
@@ -251,8 +252,16 @@ function RoomDetails() {
               }
               onPrimaryClick={() => handleDeviceToggle(device, true)}
               onSecondaryClick={() => handleDeviceToggle(device, false)}
-              primaryLabel={device.type === "door" ? "Open" : "Turn On"}
-              secondaryLabel={device.type === "door" ? "Close" : "Turn Off"}
+              primaryLabel={
+                device.type === "door" || device.type === "garage_door"
+                  ? "Open"
+                  : "Turn On"
+              }
+              secondaryLabel={
+                device.type === "door" || device.type === "garage_door"
+                  ? "Close"
+                  : "Turn Off"
+              }
             />
           ))}
         </div>

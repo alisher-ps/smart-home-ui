@@ -264,7 +264,7 @@ function Dashboard() {
                   title={device.name}
                   subtitle={device.type}
                   status={
-                    device.type === "door"
+                    device.type === "door" || device.type === "garage_door"
                       ? device.status
                         ? "OPEN"
                         : "CLOSED"
@@ -274,8 +274,16 @@ function Dashboard() {
                   }
                   onPrimaryClick={() => handleDeviceToggle(device, true)}
                   onSecondaryClick={() => handleDeviceToggle(device, false)}
-                  primaryLabel={device.type === "door" ? "Open" : "Turn On"}
-                  secondaryLabel={device.type === "door" ? "Close" : "Turn Off"}
+                  primaryLabel={
+                    device.type === "door" || device.type === "garage_door"
+                      ? "Open"
+                      : "Turn On"
+                  }
+                  secondaryLabel={
+                    device.type === "door" || device.type === "garage_door"
+                      ? "Close"
+                      : "Turn Off"
+                  }
                 />
               ))}
             </div>
@@ -295,6 +303,7 @@ function Dashboard() {
                 return (
                   <RoomCard
                     key={room.id}
+                    id={room.id}
                     name={room.name}
                     subtitle={room.type}
                     activeDevices={roomDeviceCount}

@@ -3,10 +3,12 @@ import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import RoomCard from "../components/RoomCard";
 import { getRooms, createRoom } from "../api/rooms";
+import { getDevices } from "../api/devices";
 
 function Rooms() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [rooms, setRooms] = useState([]);
+  const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -18,11 +20,20 @@ function Rooms() {
   const [creating, setCreating] = useState(false);
 
   const fetchRooms = async () => {
+    const data = await getRooms();
+    setRooms(data.rooms || []);
+  };
+
+  const fetchDevices = async () => {
+    const data = await getDevices();
+    setDevices(data.devices || []);
+  };
+
+  const fetchAll = async () => {
     try {
       setLoading(true);
       setError("");
-      const data = await getRooms();
-      setRooms(data.rooms || []);
+      await Promise.all([fetchRooms(), fetchDevices()]);
     } catch (err) {
       setError(err.message || "Failed to load rooms");
     } finally {
@@ -31,7 +42,7 @@ function Rooms() {
   };
 
   useEffect(() => {
-    fetchRooms();
+    fetchAll();
   }, []);
 
   const handleChange = (e) => {
@@ -55,12 +66,18 @@ function Rooms() {
         type: "living_room",
       });
 
-      await fetchRooms();
+      await fetchAll();
     } catch (err) {
       setError(err.message || "Failed to create room");
     } finally {
       setCreating(false);
     }
+  };
+
+  const getActiveDevicesCount = (roomId) => {
+    return devices.filter(
+      (device) => device.room_id === roomId && device.status
+    ).length;
   };
 
   return (
@@ -160,9 +177,10 @@ function Rooms() {
               {rooms.map((room) => (
                 <RoomCard
                   key={room.id}
+                  id={room.id}
                   name={room.name}
                   subtitle={room.type}
-                  activeDevices={0}
+                  activeDevices={getActiveDevicesCount(room.id)}
                   status="Connected"
                 />
               ))}

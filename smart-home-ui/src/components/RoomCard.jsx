@@ -1,34 +1,31 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-function RoomCard({ name, subtitle, activeDevices, status }) {
-  const navigate = useNavigate();
-
-  const isGood = status === "Normal" || status === "Secure";
+function RoomCard({ id, name, subtitle, activeDevices, status }) {
+  const roomSlug = String(name || "")
+    .toLowerCase()
+    .trim()
+    .replaceAll(" ", "-");
 
   return (
-    <div className="room-card">
+    <Link
+      to={`/rooms/${roomSlug}`}
+      className="room-card"
+      style={{ textDecoration: "none", color: "inherit" }}
+    >
       <div className="room-card-top">
         <div>
-          <p className="card-title">{name}</p>
-          <h3 className="room-card-value">{activeDevices} active</h3>
+          <h3>{name}</h3>
+          <p>{subtitle}</p>
         </div>
 
-        <span className={`room-status ${isGood ? "room-good" : "room-warning"}`}>
-          {status}
-        </span>
+        <span className="room-status-badge">{status}</span>
       </div>
 
-      <p className="card-subtitle room-subtitle">{subtitle}</p>
-
-      <div className="room-card-footer">
-        <button
-          className="room-btn"
-          onClick={() => navigate(`/rooms/${name.replaceAll(" ", "-")}`)}
-        >
-          View
-        </button>
+      <div className="room-card-bottom">
+        <p>{activeDevices} active devices</p>
+        <span>Open room</span>
       </div>
-    </div>
+    </Link>
   );
 }
 
